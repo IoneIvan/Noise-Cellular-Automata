@@ -1,0 +1,22 @@
+#pragma kernel CSMain
+RWTexture2D<float4> PreResult;
+RWTexture2D<float4> Result;
+
+int width;
+int height;
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    float res = PreResult[id.xy].r;
+    for (int x = -1; x < 2; x++)
+    {
+        for (int y = -1; y < 2; y++)
+        {
+            if (!(x == 0 && y == 0))
+                res += PreResult[int2((id.x + x) % width, (id.y + y + height) % height)].r;
+        }
+    }
+    res = (res + 1) % 1;
+    Result[id.xy] = float4(res, res, res, 1);
+}
